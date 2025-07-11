@@ -1,0 +1,733 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -380,
+        20
+      ],
+      "id": "beffd29d-9014-4908-bdfe-aa81a2701ea1",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "enHrFlHF9jzKnMJn",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7882d006-2bb5-48fe-9325-1ac34ef42eac",
+              "name": "fromEmail",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "41de5242-12cc-42b0-bf8f-eafa1b965f6a",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "f9fbab92-2ff4-43c8-99a9-137f7a027311",
+              "name": "emailSnippet",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        20
+      ],
+      "id": "dfba5cd3-9519-4a26-bab7-20b64eae5f0e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": "mistral-small3.1:24b-instruct-2503-q8_0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        620,
+        240
+      ],
+      "id": "33441592-7d20-4840-8c11-2b98221ca691",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "c6tI6Lmh93NDqagz",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.letter }}",
+        "options": {
+          "threadId": "={{ $('Edit Fields').item.json.threadId }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1140,
+        240
+      ],
+      "id": "beca62de-9d6b-49f7-8d96-da077792e88f",
+      "name": "Create a draft in Gmail",
+      "webhookId": "5ac65e20-c94a-496d-9ec8-c7eb2f616a32",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "enHrFlHF9jzKnMJn",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"subject\": \"California\",\n\t\"letter\": \"Los Angeles\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        700,
+        240
+      ],
+      "id": "6ae4dc8d-c591-4030-8b31-e2f27e604201",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "mistral-small3.1:24b-instruct-2503-q8_0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        700,
+        440
+      ],
+      "id": "8b109b32-93ce-4f91-950c-f3b02209b7b6",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "c6tI6Lmh93NDqagz",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mistral-small3.1:24b-instruct-2503-q8_0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        980,
+        240
+      ],
+      "id": "307fa5e3-99c1-45c1-948f-f24877cbecb4",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "c6tI6Lmh93NDqagz",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Push a draft of the email to the  {{ $('Edit Fields').item.json.fromEmail }} with the threadId {{ $('Edit Fields').item.json.threadId }} with subject {{ $json.output.subject }} and draft letter body {{ $json.output.letter }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        980,
+        20
+      ],
+      "id": "a489e13e-a6c7-4d78-818f-db3ee81dafd2",
+      "name": "Delivery"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.fromMykola }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "e6a0d02b-8193-49b0-9988-7c8f2329f6a7"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Answer Questions"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "210bd928-d682-48ab-b4ea-23f919e522b3",
+                    "leftValue": "={{ $json.output.fromMykola }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Pass"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        100,
+        300
+      ],
+      "id": "423d8711-82a2-48a7-83a9-c1df1d41bb73",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a draft of the letter to the sender {{ $('Edit Fields').item.json.fromEmail }} based on the question from the snippet {{ $('Edit Fields').item.json.emailSnippet }} and the answer provided: {{ $json.answer }}. Give me the answer as a structured JSON with the subject and letter keys",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        620,
+        20
+      ],
+      "id": "760357f5-6de7-43f5-a4ac-2936683cd3ef",
+      "name": "Letter Generator"
+    },
+    {
+      "parameters": {
+        "model": "mistral-small3.1:24b-instruct-2503-q8_0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        500
+      ],
+      "id": "80c0840b-c0b5-42a6-9adc-52478ae5f4a1",
+      "name": "Ollama Chat Model3",
+      "credentials": {
+        "ollamaApi": {
+          "id": "c6tI6Lmh93NDqagz",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"fromMykola\": true\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -100,
+        500
+      ],
+      "id": "f4220a92-b96a-4a6a-9122-28adef60dfea",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Check weather the email is from Mykola or not based on the sender: {{ $json.fromEmail }} and email snippet: {{ $json.emailSnippet }}. Return a structured JSON with the true or false values for the fromMykola key",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -260,
+        300
+      ],
+      "id": "13dc89b0-7d10-480d-b65b-f9e09de0b4cb",
+      "name": "Input Letter Eval",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/ask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"question\": \"{{ $('Edit Fields').item.json.emailSnippet }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        100
+      ],
+      "id": "cdb861a7-e157-4b73-baaa-c55af9c8e836",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "01df289e-3e3d-4131-8036-5cc517fecd0b",
+              "leftValue": "={{ $('Gmail Trigger').item.json.Subject }}",
+              "rightValue": "aisc demo day",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        60,
+        20
+      ],
+      "id": "34966f33-dd4e-4111-a287-e82631811040",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1aO86gGWdvdiR1UUg8sa8GbZQPeHNSqHqm3e6wApPbNE",
+          "mode": "list",
+          "cachedResultName": "aisc demo day",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aO86gGWdvdiR1UUg8sa8GbZQPeHNSqHqm3e6wApPbNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aO86gGWdvdiR1UUg8sa8GbZQPeHNSqHqm3e6wApPbNE/edit#gid=0"
+        }
+      },
+      "type": "n8n-nodes-base.evaluationTrigger",
+      "typeVersion": 4.6,
+      "position": [
+        60,
+        520
+      ],
+      "id": "57163586-2459-446f-9db9-86264fb08b18",
+      "name": "When fetching a dataset row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2yXV8zkqZXQGCRqT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1aO86gGWdvdiR1UUg8sa8GbZQPeHNSqHqm3e6wApPbNE",
+          "mode": "list",
+          "cachedResultName": "aisc demo day",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aO86gGWdvdiR1UUg8sa8GbZQPeHNSqHqm3e6wApPbNE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aO86gGWdvdiR1UUg8sa8GbZQPeHNSqHqm3e6wApPbNE/edit#gid=0"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "actual_category",
+              "outputValue": "={{ $json.source_type }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.6,
+      "position": [
+        580,
+        540
+      ],
+      "id": "23f66535-50de-44fb-bad0-5d7530519669",
+      "name": "Evaluation",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2yXV8zkqZXQGCRqT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "84435c31-4f69-4ef2-9d49-0de8a0c59986",
+              "name": "emailSnippet",
+              "value": "={{ $json.question }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        520
+      ],
+      "id": "30d5adeb-8560-4efd-bdb0-8ed01315267f",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/ask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"question\": \"{{ $('Edit Fields2').item.json.emailSnippet }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        380
+      ],
+      "id": "04c4294a-30e4-417f-b8b8-c3e13b23bd8b",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "setMetrics",
+        "metrics": {
+          "assignments": [
+            {
+              "id": "44033cec-073f-4d77-8fe0-e2fb53b1c083",
+              "name": "category_match",
+              "value": "={{ $json.source_type === $('When fetching a dataset row').item.json.expected_category ? 1 : 0 }}",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.6,
+      "position": [
+        900,
+        540
+      ],
+      "id": "12ed6950-05e1-4687-99cf-0842daea28c1",
+      "name": "Evaluation1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Letter Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Delivery",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Letter Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Delivery",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Letter Generator": {
+      "main": [
+        [
+          {
+            "node": "Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Input Letter Eval",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Input Letter Eval",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Letter Eval": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Input Letter Eval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Letter Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When fetching a dataset row": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Evaluation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluation": {
+      "main": [
+        [
+          {
+            "node": "Evaluation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4df54cd1-99e4-450f-a4af-e179f9d0c051",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "65bb8f11f384e7211b40178fb5e72c37e066ce86c9011031739de205aa42a2f0"
+  },
+  "id": "hGGJcc24HgZ8h9ID",
+  "tags": []
+}
