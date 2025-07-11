@@ -1,0 +1,15 @@
+# requirements.txt
+fastapi
+uvicorn
+langchain-community
+langchain_chroma
+langchain_core
+langchain_openai
+langchain_text_splitters
+langgraph
+tavily-python
+openai
+python-dotenv
+pyboxen
+pydantic
+arxiv
