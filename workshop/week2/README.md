@@ -243,3 +243,67 @@ This system is particularly valuable for:
 - Anyone requiring a balance between academic rigor and current information
 
 The modular architecture and use of LangGraph make it easy to extend and adapt the system for specific use cases or additional knowledge sources.
+
+## Bonus: Source code integrated into the n8n workflow
+
+### Install dependencies:
+In Terminal
+```bash
+cd week2/fastapi-n8n
+pip install -r requirements.txt
+```
+
+### Set environment variables in .env file
+
+```txt
+# .env
+OPENAI_API_KEY=your_openai_api_key
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+### Run the service:
+In Terminal
+```txt
+uvicorn app.main:app --reload
+```
+
+### API Documentation
+
+* Interactive docs available at: http://127.0.0.1:8000/docs
+* Health check: http://127.0.0.1:8000/health
+* Ask endpoint: POST http://127.0.0.1:8000/ask
+
+### Verify Service Endpoints
+In Terminal
+```bash
+curl -X POST "http://localhost:8000/ask" \
+-H "Content-Type: application/json" \
+-d '{"question": "Explain quantum computing"}'
+```
+
+### Setup n8n Workflow 
+To run local LLMs within the workflow, you need to install Ollama, or alternatively, replace the Ollama nodes with an OpenAI nodes
+
+In Terminal
+```bash
+npx n8n
+```
+
+Access n8n UI at: http://127.0.0.1:5678
+
+### Import n8n Workflow
+1. Go to n8n UI > Workflows > Import
+2. Use the `week2/agentic-rag-demo-n8n.json` JSON workflow provided
+3. Set up credentials for:
+    * [Gmail API access through the Google OAuth2 single service service](https://docs.n8n.io/integrations/builtin/credentials/google/oauth-single-service/#finish-your-n8n-credential)
+
+### Troubleshooting
+1. Service not running:
+    * Check API keys in `.env` file
+    * Run `uvicorn main:app --reload` from project root
+2. n8n connection issues:
+    * Verify credentials in n8n
+    * Check FastAPI is running when n8n executes workflow
+3. Missing results:
+    * Ensure Tavily/OpenAI accounts have credits
+    * Check API rate limits
